@@ -1,90 +1,29 @@
-id: record-auth-session
-info:
-  name: Record Authentication Session
-  author: [Author]
-  severity: info
-  description: |
-    Records an authentication session for a web application that uses cookie, session, or JWT token-based authentication.
-  reference: [Optional reference links]
+id: recordlogin
 
-tags:
-  - login
-  - record
-  - session
-  - authentication
+info:
+  name: recordlogin
+  author: websecresearch 
+  severity: info
+  description: Record login for any web application
 
 requests:
-  - method: POST
-    path: /login
-    raw:
-      - '{{readfile "login_request.txt"}}'
-    matchers-condition: and
-    matchers:
-      - type: word
-        words:
-          - 'Logged in successfully'
-    response-templates:
-      - template-id: set-auth-token
-        extractors:
-          - type: regex
-            regex: '(?i)Authorization:\s*(.+?)\s*'
-            matcher-condition: and
-            matchers:
-              - type: word
-                words:
-                  - 'Bearer'
-                part: data
-        save:
-          auth_token: "{{extractor 'set-auth-token' 0}}"
-      - template-id: set-session-cookie
-        extractors:
-          - type: regex
-            regex: 'Set-Cookie:\s*(.+?)\s*;'
-            matcher-condition: and
-            matchers:
-              - type: word
-                words:
-                  - 'session'
-                part: data
-        save:
-          session_cookie: "{{extractor 'set-session-cookie' 0}}"
+  - raw:
+    - |
+      GET {{Path}} HTTP/1.1
+      Host: {{Hostname}}
 
-  - method: POST
-    path: /auth/token
-    raw:
-      - '{{readfile "token_request.txt"}}'
-    matchers-condition: and
-    matchers:
-      - type: word
-        words:
-          - 'Token authenticated'
-    response-templates:
-      - template-id: set-auth-token
-        extractors:
-          - type: regex
-            regex: '"access_token":\s*"(.+?)"'
-            matcher-condition: and
-            matchers:
-              - type: word
-                words:
-                  - 'access_token'
-                part: data
-        save:
-          auth_token: "{{extractor 'set-auth-token' 0}}"
+    - |
+      POST {{Path}}/doLogin.php HTTP/1.1
+      Host: {{Hostname}}
+      Content-Type: application/x-www-form-urlencoded
+      
+      {{FileContents "path/to/credentials/file.txt"}}
 
-  - method: GET
-    path: /
-    headers:
-      Authorization: "{{auth_token}}"
-      Cookie: "{{session_cookie}}"
-    response-templates:
-      - template-id: index-page
-        extractors:
-          - type: regex
-            regex: '<title>(.+?)</title>'
-            matcher-condition: and
-            matchers:
-              - type: word
-                words:
-                  - 'Dashboard'
-                part: data
+    redirects: true
+    cookie-reuse: true      
+    req-condition: true
+    matchers:
+      - type: dsl
+        dsl:
+          - "contains(body_1,'Hello Admin User')"
+        condition: and
