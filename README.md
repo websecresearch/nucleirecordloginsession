@@ -1,18 +1,24 @@
 # nucleirecordloginsession
 
-Nuclei template to record a login session for a web applications based on session cookies, jwt token.
+Description:
+This template is used to record the login process for any web application and reuse the session for subsequent requests. It also follows redirection and performs matchers to validate the response.
 
-This is a Nuclei template named "Record Authentication Session" which is used to record an authentication session for a web application that uses cookie, session, or JWT token-based authentication. The template has the following properties:
+Author:
+This template was created by websecresearch.
 
-    id: A unique identifier for the template.
-    info: General information about the template, including its name, author, severity, description, and optional reference links.
-    tags: A list of tags that describe the template, including "login", "record", "session", and "authentication".
-    requests: A list of requests that Nuclei will send to the web application to authenticate and record the session.
+Severity:
+The severity of this template is set to info.
 
-The template has three requests:
+Requests:
+The template contains a single request consisting of two parts. The first part is a GET request that retrieves the login page. The second part is a POST request that sends the credentials to the login page and logs the user in. The credentials are taken from a file specified in the Content-Type header.
 
-    A POST request to the /login endpoint, which sends a login request to the web application using the contents of a file named login_request.txt. The template includes a matcher to ensure that the login was successful, and two response templates to extract the authentication token and session cookie from the response.
-    A POST request to the /auth/token endpoint, which sends a request to authenticate using a token. The contents of the request are stored in a file named token_request.txt. The template includes a matcher to ensure that the authentication was successful, and a response template to extract the authentication token from the response.
-    A GET request to the root endpoint (/), which includes the authentication token and session cookie in the request headers. The template includes a response template to ensure that the response contains the word "Dashboard" in the title.
+The requests also contain the following options:
 
-Overall, this template can be used to authenticate and record a session for a web application that uses various authentication methods, including cookie, session, JWT token.
+    redirects: true: This option is set to follow any redirects that occur during the login process.
+    cookie-reuse: true: This option is set to reuse the session cookie to maintain the session across subsequent requests.
+    req-condition: true: This option is set to ensure that the request is sent only if the conditions specified in the matchers are met.
+
+Matchers:
+The template contains a single matcher that validates the response. The matcher is of type dsl and checks if the response body contains the string "Hello Admin User". If the response matches this condition, the request is considered successful.
+
+Overall, this template can be used to automate the login process for any web application that requires credentials to be entered. It is flexible enough to accommodate different login forms and can be easily customized to fit specific use cases.
